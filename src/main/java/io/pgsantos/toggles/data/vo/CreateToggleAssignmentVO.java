@@ -1,8 +1,15 @@
 package io.pgsantos.toggles.data.vo;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
 public class CreateToggleAssignmentVO {
+    @NotBlank
     private String applicationCode;
+
+    @Valid
     private ToggleVO toggleVO;
+
     private boolean toggleValue;
 
     public String getApplicationCode() {

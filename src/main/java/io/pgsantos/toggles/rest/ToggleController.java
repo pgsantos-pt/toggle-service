@@ -50,7 +50,7 @@ public class ToggleController {
     }
 
     @PutMapping("/{id}")
-    public ToggleVO updateToggle(@PathVariable long id, @RequestBody ToggleRequestVO toggleRequestVO) {
+    public ToggleVO updateToggle(@PathVariable long id, @Valid @RequestBody ToggleRequestVO toggleRequestVO) {
         return toggleService.updateToggleById(id, toggleRequestVO);
     }
 

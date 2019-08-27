@@ -1,9 +1,9 @@
 package io.pgsantos.toggles.data.vo;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 public class ToggleRequestVO {
-    @NotNull
+    @NotBlank
     private String name;
 
     public String getName() {

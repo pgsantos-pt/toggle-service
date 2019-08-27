@@ -1,7 +1,11 @@
 package io.pgsantos.toggles.data.vo;
 
+import javax.validation.constraints.NotBlank;
+
 public class ToggleVO {
     private long id;
+
+    @NotBlank
     private String name;
 
     public long getId() {
