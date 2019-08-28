@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
+import java.util.List;
 
 @RestController
-@RequestMapping(value = "/toggles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/toggles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ToggleController {
     private ToggleService toggleService;
 
@@ -38,18 +38,18 @@ public class ToggleController {
     }
 
     @GetMapping
-    public Set<ToggleVO> searchToggles(@RequestParam(required = false) String name) {
+    public List<ToggleVO> searchToggles(@RequestParam(required = false) String name) {
         return toggleService.searchToggles(name);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ToggleVO> createToggle(@Valid @RequestBody ToggleRequestVO toggleRequestVO) throws URISyntaxException {
         ToggleVO toggleVO = toggleService.createToggle(toggleRequestVO);
 
         return ResponseEntity.created(new URI("/toggles/"+toggleVO.getId())).body(toggleVO);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ToggleVO updateToggle(@PathVariable long id, @Valid @RequestBody ToggleRequestVO toggleRequestVO) {
         return toggleService.updateToggleById(id, toggleRequestVO);
     }
@@ -61,12 +61,12 @@ public class ToggleController {
     }
 
     @GetMapping("/{id}/toggle-assignments")
-    public Set<ToggleAssignmentVO> getToggleAssignmentsByToggleId(@PathVariable long id) {
+    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleId(@PathVariable long id) {
         return toggleService.getToggleAssignmentsByToggleId(id);
     }
 
     @GetMapping("/toggle-assignments")
-    public Set<ToggleAssignmentVO> getToggleAssignmentsByToggleName(@RequestParam String name) {
+    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleName(@RequestParam String name) {
         return toggleService.getToggleAssignmentsByToggleName(name);
     }
 }

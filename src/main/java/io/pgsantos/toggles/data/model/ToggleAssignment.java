@@ -1,5 +1,10 @@
 package io.pgsantos.toggles.data.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,14 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Objects;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "toggle_assignments")
+@Table(name = "toggle_assignments", uniqueConstraints = {@UniqueConstraint(columnNames = {"application_code", "toggle_id"})})
 public class ToggleAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name="application_code", nullable = false)
     private String applicationCode;
@@ -25,7 +30,7 @@ public class ToggleAssignment {
     private Toggle toggle;
 
     @Column(name = "toggle_value", nullable = false)
-    private boolean toggleValue;
+    private Boolean toggleValue;
 
     public ToggleAssignment() {
     }
@@ -36,11 +41,11 @@ public class ToggleAssignment {
         this.toggleValue = toggleValue;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -60,38 +65,42 @@ public class ToggleAssignment {
         this.toggle = toggle;
     }
 
-    public boolean isToggleValue() {
+    public Boolean isToggleValue() {
         return toggleValue;
     }
 
-    public void setToggleValue(boolean toggleValue) {
+    public void setToggleValue(Boolean toggleValue) {
         this.toggleValue = toggleValue;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
+
         if (o == null || getClass() != o.getClass()) return false;
+
         ToggleAssignment that = (ToggleAssignment) o;
-        return id == that.id &&
-                toggleValue == that.toggleValue &&
-                applicationCode.equals(that.applicationCode) &&
-                toggle.equals(that.toggle);
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(applicationCode, that.applicationCode)
+                .append(toggle, that.toggle)
+                .append(toggleValue, that.toggleValue)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, applicationCode, toggle, toggleValue);
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(applicationCode)
+                .append(toggle)
+                .append(toggleValue)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ToggleAssignment{");
-        sb.append("id=").append(id);
-        sb.append(", applicationCode='").append(applicationCode).append('\'');
-        sb.append(", toggle=").append(toggle);
-        sb.append(", toggleValue=").append(toggleValue);
-        sb.append('}');
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
     }
 }

@@ -24,7 +24,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/toggle-assignments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/toggle-assignments", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ToggleAssignmentController {
     private ToggleAssignmentService toggleAssignmentService;
 
@@ -37,14 +37,14 @@ public class ToggleAssignmentController {
         return toggleAssignmentService.searchToggleAssignments(applicationCode,toggleName);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ToggleAssignmentVO> createToggleAssignment(@Valid @RequestBody CreateToggleAssignmentVO createToggleAssignmentVO) throws URISyntaxException {
         ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.createToggleAssignment(createToggleAssignmentVO);
 
         return ResponseEntity.created(new URI("/toggle-assignments/"+toggleAssignmentVO.getId())).body(toggleAssignmentVO);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ToggleAssignmentVO updateToggleAssignmentById(@PathVariable long id, @Valid @RequestBody UpdateToggleAssignmentVO updateToggleAssignmentVO) {
         return toggleAssignmentService.updateToggleAssignmentById(id, updateToggleAssignmentVO);
     }

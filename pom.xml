@@ -12,7 +12,7 @@
 	<artifactId>toggle-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>toggleService</name>
-	<description>Farfetch Toggle Service</description>
+	<description>Toggle Service</description>
 
 	<properties>
 		<java.version>12</java.version>
@@ -47,6 +47,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
@@ -66,5 +72,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

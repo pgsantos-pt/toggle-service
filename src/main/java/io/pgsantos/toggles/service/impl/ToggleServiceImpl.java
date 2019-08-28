@@ -8,12 +8,12 @@ import io.pgsantos.toggles.data.vo.ToggleVO;
 import io.pgsantos.toggles.data.vo.converter.ToggleAssignmentConverter;
 import io.pgsantos.toggles.data.vo.converter.ToggleConverter;
 import io.pgsantos.toggles.service.ToggleService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,14 +26,15 @@ public class ToggleServiceImpl implements ToggleService {
     }
 
     @Override
-    public Set<ToggleVO> searchToggles(String name) {
-        if(Objects.nonNull(name)) {
-            return Set.of(ToggleConverter.convertToVO(getToggle(fetchName -> toggleRepository.findByName(fetchName), name)));
+    public List<ToggleVO> searchToggles(String name) {
+        if(StringUtils.isNotBlank(name)) {
+            return List.of(ToggleConverter.convertToVO(getToggle(fetchName -> toggleRepository.findByName(fetchName), name)));
         }
+
         return toggleRepository.findAll()
                 .stream()
                 .map(ToggleConverter::convertToVO)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -61,23 +62,23 @@ public class ToggleServiceImpl implements ToggleService {
     }
 
     @Override
-    public Set<ToggleAssignmentVO> getToggleAssignmentsByToggleId(long id) {
+    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleId(long id) {
         return getToggle(fetchId -> toggleRepository
                 .findById(fetchId), id)
                 .getToggleAssignments()
                 .stream()
                 .map(ToggleAssignmentConverter::convertToVO)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Set<ToggleAssignmentVO> getToggleAssignmentsByToggleName(String name) {
+    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleName(String name) {
         return getToggle(fetchName -> toggleRepository
                 .findByName(fetchName), name)
                 .getToggleAssignments()
                 .stream()
                 .map(ToggleAssignmentConverter::convertToVO)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private <T> Toggle getToggle(Function<T,Optional<Toggle>> fetchFunction, T fetchCriteria) {

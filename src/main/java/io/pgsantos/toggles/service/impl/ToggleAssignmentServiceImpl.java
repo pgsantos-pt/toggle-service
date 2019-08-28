@@ -10,6 +10,7 @@ import io.pgsantos.toggles.data.vo.converter.ToggleAssignmentConverter;
 import io.pgsantos.toggles.data.vo.converter.ToggleConverter;
 import io.pgsantos.toggles.service.ToggleAssignmentService;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -30,7 +31,7 @@ public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
         toggleAssignment.setApplicationCode(applicationCode);
         toggleAssignment.setToggle(new Toggle(toggleName));
 
-        return toggleAssignmentRepository.findAll(Example.of(toggleAssignment))
+        return toggleAssignmentRepository.findAll(Example.of(toggleAssignment, ExampleMatcher.matching().withIgnoreNullValues()))
                 .stream()
                 .map(ToggleAssignmentConverter::convertToVO)
                 .collect(Collectors.toList());
