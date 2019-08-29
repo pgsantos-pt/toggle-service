@@ -16,29 +16,23 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "toggle_assignments", uniqueConstraints = {@UniqueConstraint(columnNames = {"application_code", "toggle_id"})})
+@Table(name = "toggle_assignments", uniqueConstraints = {@UniqueConstraint(columnNames = {"toggle_owner", "toggle_id"})})
 public class ToggleAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="application_code", nullable = false)
-    private String applicationCode;
-
     @ManyToOne
     @JoinColumn(name = "toggle_id")
     private Toggle toggle;
+
+    @Column(name="toggle_owner", nullable = false)
+    private String toggleOwner;
 
     @Column(name = "toggle_value", nullable = false)
     private Boolean toggleValue;
 
     public ToggleAssignment() {
-    }
-
-    public ToggleAssignment(String applicationCode, Toggle toggle, boolean toggleValue) {
-        this.applicationCode = applicationCode;
-        this.toggle = toggle;
-        this.toggleValue = toggleValue;
     }
 
     public Long getId() {
@@ -49,12 +43,12 @@ public class ToggleAssignment {
         this.id = id;
     }
 
-    public String getApplicationCode() {
-        return applicationCode;
+    public String getToggleOwner() {
+        return toggleOwner;
     }
 
-    public void setApplicationCode(String applicationCode) {
-        this.applicationCode = applicationCode;
+    public void setToggleOwner(String toggleOwner) {
+        this.toggleOwner = toggleOwner;
     }
 
     public Toggle getToggle() {
@@ -65,7 +59,7 @@ public class ToggleAssignment {
         this.toggle = toggle;
     }
 
-    public Boolean isToggleValue() {
+    public Boolean getToggleValue() {
         return toggleValue;
     }
 
@@ -83,7 +77,7 @@ public class ToggleAssignment {
 
         return new EqualsBuilder()
                 .append(id, that.id)
-                .append(applicationCode, that.applicationCode)
+                .append(toggleOwner, that.toggleOwner)
                 .append(toggle, that.toggle)
                 .append(toggleValue, that.toggleValue)
                 .isEquals();
@@ -93,7 +87,7 @@ public class ToggleAssignment {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(id)
-                .append(applicationCode)
+                .append(toggleOwner)
                 .append(toggle)
                 .append(toggleValue)
                 .toHashCode();

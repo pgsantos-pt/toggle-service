@@ -1,12 +1,16 @@
 package io.pgsantos.toggles.data.vo;
 
-import javax.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 public class ToggleVO {
     private long id;
-
-    @NotBlank
+    
     private String name;
+
+    @JsonProperty("toggleAssignments")
+    private List<ToggleAssignmentVO> toggleAssignmentsVOs;
 
     public long getId() {
         return id;
@@ -22,5 +26,13 @@ public class ToggleVO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<ToggleAssignmentVO> getToggleAssignmentsVOs() {
+        return toggleAssignmentsVOs;
+    }
+
+    public void setToggleAssignmentsVOs(List<ToggleAssignmentVO> toggleAssignmentsVOs) {
+        this.toggleAssignmentsVOs = toggleAssignmentsVOs;
     }
 }

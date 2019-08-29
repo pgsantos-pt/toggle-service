@@ -1,12 +1,10 @@
 package io.pgsantos.toggles.data.vo.builder;
 
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.ToggleVO;
 
 public final class ToggleAssignmentVOBuilder {
     private long id;
-    private String applicationCode;
-    private ToggleVO toggle;
+    private String toggleOwner;
     private boolean toggleValue;
 
     private ToggleAssignmentVOBuilder() {
@@ -21,13 +19,8 @@ public final class ToggleAssignmentVOBuilder {
         return this;
     }
 
-    public ToggleAssignmentVOBuilder withApplicationCode(String applicationCode) {
-        this.applicationCode = applicationCode;
-        return this;
-    }
-
-    public ToggleAssignmentVOBuilder withToggle(ToggleVO toggle) {
-        this.toggle = toggle;
+    public ToggleAssignmentVOBuilder withToggleOwner(String toggleOwner) {
+        this.toggleOwner = toggleOwner;
         return this;
     }
 
@@ -39,8 +32,7 @@ public final class ToggleAssignmentVOBuilder {
     public ToggleAssignmentVO build() {
         ToggleAssignmentVO toggleAssignmentVO = new ToggleAssignmentVO();
         toggleAssignmentVO.setId(id);
-        toggleAssignmentVO.setApplicationCode(applicationCode);
-        toggleAssignmentVO.setToggle(toggle);
+        toggleAssignmentVO.setToggleOwner(toggleOwner);
         toggleAssignmentVO.setToggleValue(toggleValue);
         return toggleAssignmentVO;
     }

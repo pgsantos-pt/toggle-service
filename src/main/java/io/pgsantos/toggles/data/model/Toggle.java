@@ -25,14 +25,10 @@ public class Toggle {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "toggle")
+    @OneToMany(mappedBy = "toggle", cascade = CascadeType.ALL)
     private List<ToggleAssignment> toggleAssignments;
 
     public Toggle() {
-    }
-
-    public Toggle(String name) {
-        this.name = name;
     }
 
     public Long getId() {

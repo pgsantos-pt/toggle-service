@@ -3,7 +3,7 @@ package io.pgsantos.toggles.data.vo;
 import javax.validation.constraints.NotBlank;
 
 public class ToggleRequestVO {
-    @NotBlank
+    @NotBlank(message = "The field 'name' is mandatory to have a human-readable identifier.")
     private String name;
 
     public String getName() {

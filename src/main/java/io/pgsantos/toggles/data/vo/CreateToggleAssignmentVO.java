@@ -1,34 +1,22 @@
 package io.pgsantos.toggles.data.vo;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 public class CreateToggleAssignmentVO {
-    @NotBlank
-    private String applicationCode;
-
-    @Valid
-    private ToggleVO toggleVO;
+    @NotBlank(message = "The parameter 'toggleOwner' is mandatory to be able to assign a toggle to an owner.")
+    private String toggleOwner;
 
     private boolean toggleValue;
 
-    public String getApplicationCode() {
-        return applicationCode;
+    public String getToggleOwner() {
+        return toggleOwner;
     }
 
-    public void setApplicationCode(String applicationCode) {
-        this.applicationCode = applicationCode;
+    public void setToggleOwner(String toggleOwner) {
+        this.toggleOwner = toggleOwner;
     }
 
-    public ToggleVO getToggleVO() {
-        return toggleVO;
-    }
-
-    public void setToggleVO(ToggleVO toggleVO) {
-        this.toggleVO = toggleVO;
-    }
-
-    public boolean isToggleValue() {
+    public boolean getToggleValue() {
         return toggleValue;
     }
 

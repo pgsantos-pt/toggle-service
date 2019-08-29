@@ -1,8 +1,9 @@
 package io.pgsantos.toggles.rest;
 
-import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
 import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.data.vo.UpdateToggleAssignmentVO;
 import io.pgsantos.toggles.service.ToggleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,12 +35,7 @@ public class ToggleController {
 
     @GetMapping("/{id}")
     public ToggleVO getToggle(@PathVariable long id) {
-        return toggleService.getToggleById(id);
-    }
-
-    @GetMapping
-    public List<ToggleVO> searchToggles(@RequestParam(required = false) String name) {
-        return toggleService.searchToggles(name);
+        return toggleService.getToggle(id);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -51,22 +47,42 @@ public class ToggleController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ToggleVO updateToggle(@PathVariable long id, @Valid @RequestBody ToggleRequestVO toggleRequestVO) {
-        return toggleService.updateToggleById(id, toggleRequestVO);
+        return toggleService.updateToggle(id, toggleRequestVO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteToggle(@PathVariable long id) {
-        toggleService.deleteToggleById(id);
+        toggleService.deleteToggle(id);
     }
 
-    @GetMapping("/{id}/toggle-assignments")
-    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleId(@PathVariable long id) {
-        return toggleService.getToggleAssignmentsByToggleId(id);
+    @GetMapping("/{id}/toggle-assignments/{toggleAssignmentId}")
+    public ToggleVO getToggleAssignment(@PathVariable long id, @PathVariable long toggleAssignmentId) {
+        return toggleService.getToggleAssignment(id, toggleAssignmentId);
     }
 
-    @GetMapping("/toggle-assignments")
-    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleName(@RequestParam String name) {
-        return toggleService.getToggleAssignmentsByToggleName(name);
+    @PostMapping(value = "/{id}/toggle-assignments")
+    public ResponseEntity<ToggleVO> createToggleAssignment(@PathVariable long id, @Valid @RequestBody CreateToggleAssignmentVO createToggleAssignmentVO) throws URISyntaxException {
+        ToggleVO toggleVO = toggleService.createToggleAssignment(id, createToggleAssignmentVO);
+        return ResponseEntity.created(new URI("/toggles/"+toggleVO.getId()+"/toggle-assignments/"+toggleVO.getToggleAssignmentsVOs().get(0).getId())).body(toggleVO);
+    }
+
+    @PutMapping(value = "/{id}/toggle-assignments/{toggleAssignmentId}")
+    public ToggleVO updateToggleAssignment(@PathVariable long id, @PathVariable long toggleAssignmentId, @RequestBody UpdateToggleAssignmentVO updateToggleAssignmentVO) {
+        return toggleService.updateToggleAssignment(id, toggleAssignmentId, updateToggleAssignmentVO);
+    }
+
+    @DeleteMapping("/{id}/toggle-assignments/{toggleAssignmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateToggleAssignment(@PathVariable long id, @PathVariable long toggleAssignmentId) {
+        toggleService.deleteToggleAssignment(id, toggleAssignmentId);
+    }
+
+    @GetMapping
+    public List<ToggleVO> searchToggles(
+            @RequestParam(required = false) String toggleName,
+            @RequestParam(required = false) String toggleOwner,
+            @RequestParam(required = false) Boolean hideToggleAssignments) {
+        return toggleService.searchToggles(toggleName, toggleOwner, hideToggleAssignments != null ? hideToggleAssignments : false);
     }
 }

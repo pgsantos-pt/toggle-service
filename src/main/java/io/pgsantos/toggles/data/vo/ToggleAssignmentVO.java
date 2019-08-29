@@ -2,8 +2,7 @@ package io.pgsantos.toggles.data.vo;
 
 public class ToggleAssignmentVO {
     private long id;
-    private String applicationCode;
-    private ToggleVO toggle;
+    private String toggleOwner;
     private boolean toggleValue;
 
     public long getId() {
@@ -14,20 +13,12 @@ public class ToggleAssignmentVO {
         this.id = id;
     }
 
-    public String getApplicationCode() {
-        return applicationCode;
+    public String getToggleOwner() {
+        return toggleOwner;
     }
 
-    public void setApplicationCode(String applicationCode) {
-        this.applicationCode = applicationCode;
-    }
-
-    public ToggleVO getToggle() {
-        return toggle;
-    }
-
-    public void setToggle(ToggleVO toggle) {
-        this.toggle = toggle;
+    public void setToggleOwner(String toggleOwner) {
+        this.toggleOwner = toggleOwner;
     }
 
     public boolean isToggleValue() {
