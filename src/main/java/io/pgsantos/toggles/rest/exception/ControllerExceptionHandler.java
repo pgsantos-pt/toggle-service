@@ -1,6 +1,9 @@
 package io.pgsantos.toggles.rest.exception;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -19,5 +22,21 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public final ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException exception){
         return ResponseEntity.badRequest().body(Map.of("status", "FAIL", "error", exception.getMessage()));
+    }
+
+    @ExceptionHandler(JpaObjectRetrievalFailureException.class)
+    public final ResponseEntity<Map<String, String>> handleJpaObjectRetrievalFailureException(JpaObjectRetrievalFailureException exception){
+        String errorMessage = StringUtils.isNotBlank(exception.getMessage()) ? exception.getMessage() : "";
+
+        if(errorMessage.startsWith("Unable to find") && errorMessage.contains("Toggle")) {
+            errorMessage = exception.getCause().getMessage();
+            errorMessage = "Unable to find a toggle with id " + errorMessage.substring(errorMessage.length()-1);
+        }
+        return ResponseEntity.badRequest().body(Map.of("status", "FAIL", "error", errorMessage));
+    }
+
+    @ExceptionHandler(JpaSystemException.class)
+    public final ResponseEntity<Map<String, String>> handleJpaSystemException(JpaSystemException exception) {
+        return ResponseEntity.badRequest().body(Map.of("status", "FAIL", "error", exception.getCause().getMessage()));
     }
 }

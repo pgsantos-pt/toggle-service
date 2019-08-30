@@ -3,6 +3,8 @@ package io.pgsantos.toggles.service.impl;
 import io.pgsantos.toggles.data.converter.ToggleConverter;
 import io.pgsantos.toggles.data.model.Toggle;
 import io.pgsantos.toggles.data.model.ToggleAssignment;
+import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
+import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
 import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
@@ -23,9 +25,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder.aToggleAssignment;
-import static io.pgsantos.toggles.data.model.builder.ToggleBuilder.aToggle;
-
 @Service
 public class ToggleServiceImpl implements ToggleService {
     private ToggleRepository toggleRepository;
@@ -45,7 +44,7 @@ public class ToggleServiceImpl implements ToggleService {
     @Override
     @Transactional
     public ToggleVO createToggle(ToggleRequestVO toggleRequestVO) {
-        return ToggleConverter.convertToVO(toggleRepository.save(aToggle().withName(toggleRequestVO.getName()).build()));
+        return ToggleConverter.convertToVO(toggleRepository.save(ToggleBuilder.aToggle().withName(toggleRequestVO.getName()).build()));
     }
 
     @Override
@@ -74,8 +73,8 @@ public class ToggleServiceImpl implements ToggleService {
     @Transactional
     public ToggleVO createToggleAssignment(long toggleId, CreateToggleAssignmentVO createToggleAssignmentVO) {
         ToggleAssignment toggleAssignment = toggleAssignmentRepository.save(
-                aToggleAssignment()
-                        .withToggle(getToggle(fetchId -> toggleRepository.findById(fetchId), toggleId))
+                ToggleAssignmentBuilder.aToggleAssignment()
+                        .withToggle(ToggleBuilder.aToggle().withId(toggleId).build())
                         .withToggleOwner(createToggleAssignmentVO.getToggleOwner())
                         .withToggleValue(createToggleAssignmentVO.getToggleValue())
                         .build());
@@ -111,9 +110,9 @@ public class ToggleServiceImpl implements ToggleService {
             toggleVOs = List.of(ToggleConverter.convertToVO(getToggle(fetchName -> toggleRepository.findByName(fetchName), toggleName)));
         }
         else {
-            ToggleAssignment toggleAssignment = aToggleAssignment()
+            ToggleAssignment toggleAssignment = ToggleAssignmentBuilder.aToggleAssignment()
                     .withToggleOwner(toggleOwner)
-                    .withToggle(aToggle().withName(toggleName).build())
+                    .withToggle(ToggleBuilder.aToggle().withName(toggleName).build())
                     .build();
 
             toggleVOs = toggleAssignmentRepository.findAll(Example.of(toggleAssignment, ExampleMatcher.matching().withIgnoreNullValues()))
