@@ -1,21 +1,19 @@
 package io.pgsantos.toggles.data.vo;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class ToggleAssignmentVO {
-    private long id;
+public class ToggleAssignmentVO extends ToggleVO {
+    private long toggleAssignmentId;
     private String toggleOwner;
     private boolean toggleValue;
 
-    public long getId() {
-        return id;
+    public long getToggleAssignmentId() {
+        return toggleAssignmentId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setToggleAssignmentId(long toggleAssignmentId) {
+        this.toggleAssignmentId = toggleAssignmentId;
     }
 
     public String getToggleOwner() {
@@ -32,30 +30,6 @@ public class ToggleAssignmentVO {
 
     public void setToggleValue(boolean toggleValue) {
         this.toggleValue = toggleValue;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ToggleAssignmentVO that = (ToggleAssignmentVO) o;
-
-        return new EqualsBuilder()
-                .append(id, that.id)
-                .append(toggleValue, that.toggleValue)
-                .append(toggleOwner, that.toggleOwner)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(id)
-                .append(toggleOwner)
-                .append(toggleValue)
-                .toHashCode();
     }
 
     @Override

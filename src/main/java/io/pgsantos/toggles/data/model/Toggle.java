@@ -5,15 +5,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table(name = "toggles")
@@ -24,9 +21,6 @@ public class Toggle {
 
     @Column(nullable = false, unique = true)
     private String name;
-
-    @OneToMany(mappedBy = "toggle", cascade = CascadeType.ALL)
-    private List<ToggleAssignment> toggleAssignments;
 
     public Toggle() {
     }
@@ -47,14 +41,6 @@ public class Toggle {
         this.name = name;
     }
 
-    public List<ToggleAssignment> getToggleAssignments() {
-        return toggleAssignments;
-    }
-
-    public void setToggleAssignments(List<ToggleAssignment> toggleAssignments) {
-        this.toggleAssignments = toggleAssignments;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,7 +52,6 @@ public class Toggle {
         return new EqualsBuilder()
                 .append(id, toggle.id)
                 .append(name, toggle.name)
-                .append(toggleAssignments, toggle.toggleAssignments)
                 .isEquals();
     }
 
@@ -75,7 +60,6 @@ public class Toggle {
         return new HashCodeBuilder(17, 37)
                 .append(id)
                 .append(name)
-                .append(toggleAssignments)
                 .toHashCode();
     }
 

@@ -1,19 +1,7 @@
 package io.pgsantos.toggles.data.converter;
 
-import io.pgsantos.toggles.data.vo.ToggleVO;
-import org.junit.Test;
-
-import java.util.Collections;
-import java.util.List;
-
-import static io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder.aToggleAssignment;
-import static io.pgsantos.toggles.data.model.builder.ToggleBuilder.aToggle;
-import static io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder.aToggleAssignmentVO;
-import static io.pgsantos.toggles.data.vo.builder.ToggleVOBuilder.aToggleVO;
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class ToggleConverterTest {
-    @Test
+    /*@Test
     public void convertToVO() {
         ToggleVO expectedToggleVO =
                 aToggleVO()
@@ -85,5 +73,5 @@ public class ToggleConverterTest {
                         .build());
 
         assertThat(toggleVO).isEqualTo(expectedToggleVO);
-    }
+    }*/
 }

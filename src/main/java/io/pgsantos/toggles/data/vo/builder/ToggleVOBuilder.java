@@ -1,14 +1,10 @@
 package io.pgsantos.toggles.data.vo.builder;
 
-import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
 
-import java.util.List;
-
 public final class ToggleVOBuilder {
-    private long id;
-    private String name;
-    private List<ToggleAssignmentVO> toggleAssignmentsVOs;
+    private long toggleId;
+    private String toggleName;
 
     private ToggleVOBuilder() {
     }
@@ -17,26 +13,20 @@ public final class ToggleVOBuilder {
         return new ToggleVOBuilder();
     }
 
-    public ToggleVOBuilder withId(long id) {
-        this.id = id;
+    public ToggleVOBuilder withToggleId(long toggleId) {
+        this.toggleId = toggleId;
         return this;
     }
 
-    public ToggleVOBuilder withName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public ToggleVOBuilder withToggleAssignmentsVOs(List<ToggleAssignmentVO> toggleAssignmentsVOs) {
-        this.toggleAssignmentsVOs = toggleAssignmentsVOs;
+    public ToggleVOBuilder withToggleName(String toggleName) {
+        this.toggleName = toggleName;
         return this;
     }
 
     public ToggleVO build() {
         ToggleVO toggleVO = new ToggleVO();
-        toggleVO.setId(id);
-        toggleVO.setName(name);
-        toggleVO.setToggleAssignmentsVOs(toggleAssignmentsVOs);
+        toggleVO.setToggleId(toggleId);
+        toggleVO.setToggleName(toggleName);
         return toggleVO;
     }
 }

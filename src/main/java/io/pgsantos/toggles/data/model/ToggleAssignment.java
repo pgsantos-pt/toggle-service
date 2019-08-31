@@ -4,30 +4,27 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.data.domain.Persistable;
 
-import javax.lang.model.UnknownEntityException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "toggle_assignments", uniqueConstraints = {@UniqueConstraint(columnNames = {"toggle_id", "toggle_owner"})})
-public class ToggleAssignment implements Persistable<Long> {
+public class ToggleAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "toggle_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "toggle_id", nullable = false)
     private Toggle toggle;
 
     @Column(name="toggle_owner", nullable = false)
@@ -69,15 +66,6 @@ public class ToggleAssignment implements Persistable<Long> {
 
     public void setToggleValue(Boolean toggleValue) {
         this.toggleValue = toggleValue;
-    }
-
-    @Override
-    public boolean isNew() {
-        if(null == getId() && toggle.getId() == null) {
-            throw new PersistenceException("No toggle id was provided to create the toggle assignment");
-        }
-
-        return false;
     }
 
     @Override

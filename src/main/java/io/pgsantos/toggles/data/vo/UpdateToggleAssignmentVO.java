@@ -3,7 +3,7 @@ package io.pgsantos.toggles.data.vo;
 public class UpdateToggleAssignmentVO {
     private boolean toggleValue;
 
-    public boolean isToggleValue() {
+    public boolean getToggleValue() {
         return toggleValue;
     }
 
