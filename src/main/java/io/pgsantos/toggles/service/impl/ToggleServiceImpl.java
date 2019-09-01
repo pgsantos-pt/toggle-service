@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +38,7 @@ public class ToggleServiceImpl implements ToggleService {
     @Override
     @Transactional(readOnly = true)
     public ToggleVO getToggle(long id) {
-        return ToggleConverter.convertToVO(getToggle(fetchId -> toggleRepository.findById(fetchId), id));
+        return ToggleConverter.convertToVO(loadToggle(id));
     }
 
     @Override
@@ -52,7 +50,7 @@ public class ToggleServiceImpl implements ToggleService {
     @Override
     @Transactional
     public ToggleVO updateToggle(long id, ToggleRequestVO toggleRequestVO) {
-        Toggle toggle = getToggle(fetchId -> toggleRepository.findById(fetchId), id);
+        Toggle toggle = loadToggle(id);
 
         toggle.setName(toggleRequestVO.getName());
 
@@ -65,9 +63,7 @@ public class ToggleServiceImpl implements ToggleService {
         toggleRepository.deleteById(id);
     }
 
-    private <T> Toggle getToggle(Function<T, Optional<Toggle>> fetchFunction, T fetchCriteria) {
-        return fetchFunction
-                .apply(fetchCriteria)
-                .orElseThrow(() -> new ResourceNotFoundException("The requested toggle ["+ fetchCriteria +"] was not found"));
+    private Toggle loadToggle(long id) {
+        return toggleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("The requested toggle ["+ id +"] was not found"));
     }
 }

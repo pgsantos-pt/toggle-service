@@ -59,18 +59,9 @@ public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
     @Override
     @Transactional
     public ToggleAssignmentVO updateToggleAssignment(long toggleId, long toggleAssignmentId, UpdateToggleAssignmentVO updateToggleAssignmentVO) {
-        if(!toggleRepository.existsById(toggleId)) {
-            throw new ResourceNotFoundException("The requested toggle ["+ toggleId +"] was not found");
-        }
-
-        return toggleAssignmentRepository
-                .findById(toggleAssignmentId)
-                .map(toggleAssignment -> {
-                    toggleAssignment.setToggleValue(updateToggleAssignmentVO.getToggleValue());
-                    return toggleAssignmentRepository.save(toggleAssignment);
-                })
-                .map(ToggleAssignmentConverter::convertToVO)
-                .orElseThrow(() -> new ResourceNotFoundException("The requested toggle assignment ["+ toggleAssignmentId +"] was not found"));
+        ToggleAssignment toggleAssignment = loadToggleAssignment(toggleId, toggleAssignmentId);
+        toggleAssignment.setToggleValue(updateToggleAssignmentVO.getToggleValue());
+        return ToggleAssignmentConverter.convertToVO(toggleAssignmentRepository.save(toggleAssignment));
     }
 
     @Override

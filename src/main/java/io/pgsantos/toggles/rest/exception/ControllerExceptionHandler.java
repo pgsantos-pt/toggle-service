@@ -1,6 +1,7 @@
 package io.pgsantos.toggles.rest.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,5 +26,10 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PersistenceException.class)
     public final ResponseEntity<Map<String, String>> handlePersistenceException(PersistenceException exception){
         return ResponseEntity.unprocessableEntity().body(Map.of("status", "FAIL", "error", "It is not possible to process this request"));
+    }
+
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public final ResponseEntity<Void> handleEmptyResultDataAccessException(EmptyResultDataAccessException exception){
+        return ResponseEntity.notFound().build();
     }
 }

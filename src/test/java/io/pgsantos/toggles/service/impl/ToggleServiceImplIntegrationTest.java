@@ -3,8 +3,10 @@ package io.pgsantos.toggles.service.impl;
 import io.pgsantos.toggles.data.model.Toggle;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
-import io.pgsantos.toggles.data.vo.ToggleRequestVOTestBuilder;
+import io.pgsantos.toggles.data.vo.ToggleRequestVO;
+import io.pgsantos.toggles.data.vo.builder.ToggleRequestVOTestBuilder;
 import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.data.vo.builder.ToggleVOBuilder;
 import io.pgsantos.toggles.exception.ResourceNotFoundException;
 import io.pgsantos.toggles.service.ToggleService;
 import io.pgsantos.toggles.service.config.ServiceConfig;
@@ -52,16 +54,21 @@ public class ToggleServiceImplIntegrationTest {
     public void findToggles() {
         String name = RandomStringUtils.random(10);
 
+        ToggleVO expectedToggleVO = ToggleVOBuilder.aToggleVO()
+                .withToggleId(new Random().nextLong())
+                .withToggleName(name)
+                .build();
+
         when(toggleRepository.findAll(any(Example.class)))
                 .thenReturn(List.of(
                         ToggleBuilder.aToggle()
-                                .withId(new Random().nextLong())
-                                .withName(name)
+                                .withId(expectedToggleVO.getToggleId())
+                                .withName(expectedToggleVO.getToggleName())
                                 .build()));
 
-        List<ToggleVO> toggles = toggleService.findToggles(name);
+        List<ToggleVO> toggleVOs = toggleService.findToggles(name);
 
-        assertThat(toggles.get(0).getToggleName()).isEqualTo(name);
+        assertThat(toggleVOs.get(0)).isEqualTo(expectedToggleVO);
 
         verify(toggleRepository).findAll(
                 Example.of(
@@ -75,9 +82,9 @@ public class ToggleServiceImplIntegrationTest {
 
         when(toggleRepository.findAll(any(Example.class))).thenReturn(Collections.emptyList());
 
-        List<ToggleVO> toggles = toggleService.findToggles(name);
+        List<ToggleVO> toggleVOs = toggleService.findToggles(name);
 
-        assertThat(toggles).isEmpty();
+        assertThat(toggleVOs).isEmpty();
 
         verify(toggleRepository).findAll(
                 Example.of(
@@ -87,21 +94,24 @@ public class ToggleServiceImplIntegrationTest {
 
     @Test
     public void getToggle() {
-        Long toggleId = new Random().nextLong();
-        String toggleName = RandomStringUtils.random(10);
+        long toggleId = new Random().nextLong();
+
+        ToggleVO expectedToggleVO = ToggleVOBuilder.aToggleVO()
+                .withToggleId(toggleId)
+                .withToggleName(RandomStringUtils.random(10))
+                .build();
 
         when(toggleRepository.findById(anyLong()))
                 .thenReturn(
                         Optional.of(
                                 ToggleBuilder.aToggle()
-                                        .withId(toggleId)
-                                        .withName(toggleName)
+                                        .withId(expectedToggleVO.getToggleId())
+                                        .withName(expectedToggleVO.getToggleName())
                                         .build()));
 
-        ToggleVO toggle = toggleService.getToggle(toggleId);
+        ToggleVO toggleVO = toggleService.getToggle(toggleId);
 
-        assertThat(toggle.getToggleId()).isEqualTo(toggleId);
-        assertThat(toggle.getToggleName()).isEqualTo(toggleName);
+        assertThat(toggleVO).isEqualTo(expectedToggleVO);
 
         verify(toggleRepository).findById(toggleId);
     }
@@ -121,20 +131,23 @@ public class ToggleServiceImplIntegrationTest {
 
     @Test
     public void createToggle() {
-        Long toggleId = new Random().nextLong();
         String toggleName = RandomStringUtils.random(10);
+
+        ToggleVO expectedToggleVO = ToggleVOBuilder.aToggleVO()
+                .withToggleId(new Random().nextLong())
+                .withToggleName(toggleName)
+                .build();
 
         when(toggleRepository.save(any(Toggle.class)))
                 .thenReturn(
                         ToggleBuilder.aToggle()
-                                .withId(toggleId)
-                                .withName(toggleName)
+                                .withId(expectedToggleVO.getToggleId())
+                                .withName(expectedToggleVO.getToggleName())
                                 .build());
 
-        ToggleVO toggle = toggleService.createToggle(ToggleRequestVOTestBuilder.aToggleRequestVO().withName(toggleName).build());
+        ToggleVO toggleVO = toggleService.createToggle(ToggleRequestVOTestBuilder.aToggleRequestVO().withName(toggleName).build());
 
-        assertThat(toggle.getToggleId()).isEqualTo(toggleId);
-        assertThat(toggle.getToggleName()).isEqualTo(toggleName);
+        assertThat(toggleVO).isEqualTo(expectedToggleVO);
 
         verify(toggleRepository).save(ToggleBuilder.aToggle().withName(toggleName).build());
     }
@@ -144,20 +157,24 @@ public class ToggleServiceImplIntegrationTest {
         long toggleId = new Random().nextLong();
         String toggleName = RandomStringUtils.random(10);
 
+        ToggleVO expectedToggleVO = ToggleVOBuilder.aToggleVO()
+                .withToggleId(toggleId)
+                .withToggleName(toggleName)
+                .build();
+
         Toggle toggle = spy(Toggle.class);
 
         when(toggleRepository.findById(anyLong())).thenReturn(Optional.of(toggle));
         when(toggleRepository.save(any(Toggle.class)))
                 .thenReturn(
                         ToggleBuilder.aToggle()
-                                .withId(toggleId)
-                                .withName(toggleName)
+                                .withId(expectedToggleVO.getToggleId())
+                                .withName(expectedToggleVO.getToggleName())
                                 .build());
 
         ToggleVO toggleVO = toggleService.updateToggle(toggleId, ToggleRequestVOTestBuilder.aToggleRequestVO().withName(toggleName).build());
 
-        assertThat(toggleVO.getToggleId()).isEqualTo(toggleId);
-        assertThat(toggleVO.getToggleName()).isEqualTo(toggleName);
+        assertThat(toggleVO).isEqualTo(expectedToggleVO);
 
         verify(toggleRepository).findById(toggleId);
         verify(toggle).setName(toggleName);
@@ -172,7 +189,7 @@ public class ToggleServiceImplIntegrationTest {
         when(toggleRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = catchThrowableOfType(
-                () -> toggleService.updateToggle(toggleId, ToggleRequestVOTestBuilder.aToggleRequestVO().build()),
+                () -> toggleService.updateToggle(toggleId, any(ToggleRequestVO.class)),
                 ResourceNotFoundException.class);
 
         assertThat(exception.getMessage()).isEqualTo("The requested toggle [" + toggleId + "] was not found");

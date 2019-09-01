@@ -1,4 +1,6 @@
-package io.pgsantos.toggles.data.vo;
+package io.pgsantos.toggles.data.vo.builder;
+
+import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 
 public final class ToggleRequestVOTestBuilder {
     private String name;

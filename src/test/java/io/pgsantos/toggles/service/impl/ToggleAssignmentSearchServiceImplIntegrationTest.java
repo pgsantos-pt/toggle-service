@@ -4,6 +4,7 @@ import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder;
 import io.pgsantos.toggles.service.ToggleAssignmentSearchService;
 import io.pgsantos.toggles.service.config.ServiceConfig;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,20 +47,30 @@ public class ToggleAssignmentSearchServiceImplIntegrationTest {
         String toggleName = RandomStringUtils.random(10);
         String toggleOwner = RandomStringUtils.random(10);
 
+        ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
+                .withToggleId(new Random().nextLong())
+                .withToggleName(toggleName)
+                .withToggleAssignmentId(new Random().nextLong())
+                .withToggleOwner(toggleOwner)
+                .withToggleValue(new Random().nextBoolean())
+                .build();
+
         when(toggleAssignmentRepository.findAll(any(Example.class)))
                 .thenReturn(
                         List.of(
                                 ToggleAssignmentBuilder.aToggleAssignment()
-                                        .withToggleOwner(toggleOwner)
+                                        .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
+                                        .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
+                                        .withToggleValue(expectedToggleAssignmentVO.getToggleValue())
                                         .withToggle(ToggleBuilder.aToggle()
-                                                .withName(toggleName)
+                                                .withId(expectedToggleAssignmentVO.getToggleId())
+                                                .withName(expectedToggleAssignmentVO.getToggleName())
                                                 .build())
                                         .build()));
 
-        List<ToggleAssignmentVO> toggleAssignments = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
+        List<ToggleAssignmentVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
 
-        assertThat(toggleAssignments.get(0).getToggleName()).isEqualTo(toggleName);
-        assertThat(toggleAssignments.get(0).getToggleOwner()).isEqualTo(toggleOwner);
+        assertThat(toggleAssignmentVOs.get(0)).isEqualTo(expectedToggleAssignmentVO);
 
         verify(toggleAssignmentRepository)
                 .findAll(
@@ -80,9 +92,9 @@ public class ToggleAssignmentSearchServiceImplIntegrationTest {
 
         when(toggleAssignmentRepository.findAll(any(Example.class))).thenReturn(Collections.emptyList());
 
-        List<ToggleAssignmentVO> toggleAssignments = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
+        List<ToggleAssignmentVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
 
-        assertThat(toggleAssignments).isEmpty();
+        assertThat(toggleAssignmentVOs).isEmpty();
 
         verify(toggleAssignmentRepository)
                 .findAll(
