@@ -1,77 +1,48 @@
 package io.pgsantos.toggles.data.converter;
 
+import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
+import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.data.vo.builder.ToggleVOBuilder;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Test;
+
+import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
 public class ToggleConverterTest {
-    /*@Test
+    @Test
     public void convertToVO() {
-        ToggleVO expectedToggleVO =
-                aToggleVO()
-                        .withId(1L)
-                        .withName("name")
-                        .withToggleAssignmentsVOs(List.of(
-                                aToggleAssignmentVO()
-                                        .withId(1L).withToggleOwner("owner")
-                                        .withToggleValue(true)
-                                        .build()))
-                        .build();
+        ToggleVO expectedToggleVO = ToggleVOBuilder.aToggleVO()
+                .withToggleId(new Random().nextLong())
+                .withToggleName(RandomStringUtils.random(10))
+                .build();
 
         ToggleVO toggleVO = ToggleConverter.convertToVO(
-                aToggle()
-                        .withId(1L)
-                        .withName("name")
-                        .withToggleAssignments(List.of(
-                                aToggleAssignment()
-                                        .withId(1L)
-                                        .withToggleOwner("owner")
-                                        .withToggleValue(true)
-                                        .build()))
+                ToggleBuilder.aToggle()
+                        .withId(expectedToggleVO.getToggleId())
+                        .withName(expectedToggleVO.getToggleName())
                         .build());
 
         assertThat(toggleVO).isEqualTo(expectedToggleVO);
     }
 
     @Test
-    public void convertToVO_withNoToggleAssignments() {
-        ToggleVO expectedToggleVO =
-                aToggleVO()
-                        .withId(1L)
-                        .withName("name")
-                        .withToggleAssignmentsVOs(Collections.emptyList())
-                        .build();
-
-        ToggleVO toggleVO = ToggleConverter.convertToVO(
-                aToggle()
-                        .withId(1L)
-                        .withName("name")
-                        .build());
-
-        assertThat(toggleVO).isEqualTo(expectedToggleVO);
+    public void convertToVO_withNoData_shouldThrowNPE() {
+        Throwable exception = catchThrowable(() -> ToggleConverter.convertToVO(ToggleBuilder.aToggle().build()));
+        assertThat(exception).isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    public void convertToggleAssignmentToToggleVO() {
-        ToggleVO expectedToggleVO =
-                aToggleVO()
-                        .withId(1L)
-                        .withName("name")
-                        .withToggleAssignmentsVOs(List.of(
-                                aToggleAssignmentVO()
-                                        .withId(1L).withToggleOwner("owner")
-                                        .withToggleValue(true)
-                                        .build()))
-                        .build();
+    public void convertToVO_withMissingFields_shouldThrowNPE() {
+        Throwable exception = catchThrowable(() -> ToggleConverter.convertToVO(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build()));
+        assertThat(exception).isInstanceOf(NullPointerException.class);
+    }
 
-        ToggleVO toggleVO = ToggleConverter.convertToggleAssignmentToToggleVO(
-                aToggleAssignment()
-                        .withId(1L)
-                        .withToggleOwner("owner")
-                        .withToggleValue(true)
-                        .withToggle(
-                                aToggle()
-                                        .withId(1L)
-                                        .withName("name")
-                                        .build())
-                        .build());
-
-        assertThat(toggleVO).isEqualTo(expectedToggleVO);
-    }*/
+    @Test
+    public void convertToVO_withNoToggle_shouldThrowNPE() {
+        Throwable exception = catchThrowable(() -> ToggleConverter.convertToVO(null));
+        assertThat(exception).isInstanceOf(NullPointerException.class);
+    }
 }

@@ -1,22 +1,22 @@
 package io.pgsantos.toggles.data.repository;
 
+import io.pgsantos.toggles.data.model.Toggle;
 import io.pgsantos.toggles.data.model.ToggleAssignment;
 import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -28,55 +28,65 @@ public class ToggleAssignmentRepositoryIntegrationTest {
     private ToggleAssignmentRepository toggleAssignmentRepository;
 
     @Test
-    public void save() {
-        Long toggleId = (Long) entityManager.persistAndGetId(ToggleBuilder.aToggle().withName("name").build());
-        entityManager.flush();
-
-        ToggleAssignment toggleAssignment = toggleAssignmentRepository.save(
+    public void findAllByToggle_Id() {
+        Toggle toggle = entityManager.persist(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build());
+        ToggleAssignment toggleAssignment1 = entityManager.persist(
                 ToggleAssignmentBuilder.aToggleAssignment()
-                        .withToggleOwner("owner")
-                        .withToggleValue(true)
-                        .withToggle(ToggleBuilder.aToggle().withId(toggleId).build())
+                        .withToggleOwner(RandomStringUtils.random(10))
+                        .withToggleValue(new Random().nextBoolean())
+                        .withToggle(toggle)
                         .build());
 
-        ToggleAssignment expectedToggleAssignment = ToggleAssignmentBuilder.aToggleAssignment()
-                .withId(1L)
-                .withToggleOwner("owner")
-                .withToggleValue(true)
-                .withToggle(ToggleBuilder.aToggle()
-                        .withId(toggleId)
-                        .withName("name")
-                        .build())
-                .build();
+        ToggleAssignment toggleAssignment2 = entityManager.persist(
+                ToggleAssignmentBuilder.aToggleAssignment()
+                        .withToggleOwner(RandomStringUtils.random(10))
+                        .withToggleValue(new Random().nextBoolean())
+                        .withToggle(toggle)
+                        .build());
 
-        assertThat(toggleAssignment).isEqualTo(expectedToggleAssignment);
+        entityManager.flush();
+
+        Stream<ToggleAssignment> toggleAssignments = toggleAssignmentRepository.findAllByToggle_Id(toggle.getId());
+
+        assertThat(toggleAssignments).containsOnly(toggleAssignment1, toggleAssignment2);
     }
 
     @Test
-    public void save_withNoPersistedToggle_shouldThrowJpaObjectRetrievalFailureException() {
-        ToggleAssignment toggleAssignment = ToggleAssignmentBuilder.aToggleAssignment()
-                .withToggleOwner("owner")
-                .withToggleValue(true)
-                .withToggle(ToggleBuilder.aToggle().withId(1L).build())
-                .build();
+    public void findAllByToggle_Id_whenNonExistingToggleAssignment_shouldReturnEmptyStream() {
+        Toggle toggle = entityManager.persist(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build());
 
-        JpaObjectRetrievalFailureException exception = catchThrowableOfType(() -> toggleAssignmentRepository.save(toggleAssignment), JpaObjectRetrievalFailureException.class);
+        entityManager.flush();
 
-        assertThat(exception.getCause()).isInstanceOf(EntityNotFoundException.class);
-        assertThat(exception.getCause().getMessage()).isEqualTo("Unable to find io.pgsantos.toggles.data.model.Toggle with id " + toggleAssignment.getToggle().getId());
+        Stream<ToggleAssignment> toggleAssignments = toggleAssignmentRepository.findAllByToggle_Id(toggle.getId());
+
+        assertThat(toggleAssignments).isEmpty();
     }
 
     @Test
-    public void save_withNoToggle_shouldThrowJpaSystemExceptionWithNestedPersistedException() {
-        ToggleAssignment toggleAssignment = ToggleAssignmentBuilder.aToggleAssignment()
-                .withToggleOwner("owner")
-                .withToggleValue(true)
-                .withToggle(ToggleBuilder.aToggle().withName("name").build())
-                .build();
+    public void findByIdAndToggle_Id() {
+        Toggle toggle = entityManager.persist(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build());
+        ToggleAssignment expectedToggleAssignment = entityManager.persist(
+                ToggleAssignmentBuilder.aToggleAssignment()
+                        .withToggleOwner(RandomStringUtils.random(10))
+                        .withToggleValue(new Random().nextBoolean())
+                        .withToggle(toggle)
+                        .build());
 
-        JpaSystemException exception = catchThrowableOfType(() -> toggleAssignmentRepository.save(toggleAssignment), JpaSystemException.class);
+        entityManager.flush();
 
-        assertThat(exception.getCause()).isInstanceOf(PersistenceException.class);
-        assertThat(exception.getCause().getMessage()).isEqualTo("No toggle id was provided to create the toggle assignment");
+        Optional<ToggleAssignment> toggleAssignment = toggleAssignmentRepository.findByIdAndToggle_Id(expectedToggleAssignment.getId(), toggle.getId());
+
+        assertThat(toggleAssignment.get()).isEqualTo(expectedToggleAssignment);
+    }
+
+    @Test
+    public void findByIdAndToggle_Id_withNonExistingToggleAssignment_shouldReturnOptionalEmpty() {
+        Toggle toggle = entityManager.persist(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build());
+
+        entityManager.flush();
+
+        Optional<ToggleAssignment> toggleAssignment = toggleAssignmentRepository.findByIdAndToggle_Id(new Random().nextLong(), toggle.getId());
+
+        assertThat(toggleAssignment.isPresent()).isFalse();
     }
 }

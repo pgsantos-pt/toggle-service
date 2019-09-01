@@ -6,13 +6,14 @@ import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
 import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.exception.ResourceNotFoundException;
 import io.pgsantos.toggles.service.ToggleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -20,11 +21,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ToggleServiceImpl implements ToggleService {
+    @Autowired
     private ToggleRepository toggleRepository;
-
-    public ToggleServiceImpl(ToggleRepository toggleRepository) {
-        this.toggleRepository = toggleRepository;
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -70,6 +68,6 @@ public class ToggleServiceImpl implements ToggleService {
     private <T> Toggle getToggle(Function<T, Optional<Toggle>> fetchFunction, T fetchCriteria) {
         return fetchFunction
                 .apply(fetchCriteria)
-                .orElseThrow(() -> new EntityNotFoundException("The requested toggle ["+ fetchCriteria +"] was not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("The requested toggle ["+ fetchCriteria +"] was not found"));
     }
 }

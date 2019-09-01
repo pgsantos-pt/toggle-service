@@ -8,23 +8,22 @@ import io.pgsantos.toggles.data.repository.ToggleRepository;
 import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
 import io.pgsantos.toggles.data.vo.UpdateToggleAssignmentVO;
+import io.pgsantos.toggles.exception.ResourceNotFoundException;
 import io.pgsantos.toggles.service.ToggleAssignmentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
+    @Autowired
     private ToggleRepository toggleRepository;
-    private ToggleAssignmentRepository toggleAssignmentRepository;
 
-    public ToggleAssignmentServiceImpl(ToggleRepository toggleRepository, ToggleAssignmentRepository toggleAssignmentRepository) {
-        this.toggleRepository = toggleRepository;
-        this.toggleAssignmentRepository = toggleAssignmentRepository;
-    }
+    @Autowired
+    private ToggleAssignmentRepository toggleAssignmentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,14 +53,14 @@ public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
                                         .withToggleValue(createToggleAssignmentVO.getToggleValue())
                                         .build()))
                 .map(ToggleAssignmentConverter::convertToVO)
-                .orElseThrow(() -> new EntityNotFoundException("The requested toggle ["+ toggleId +"] was not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("The requested toggle ["+ toggleId +"] was not found"));
     }
 
     @Override
     @Transactional
     public ToggleAssignmentVO updateToggleAssignment(long toggleId, long toggleAssignmentId, UpdateToggleAssignmentVO updateToggleAssignmentVO) {
         if(!toggleRepository.existsById(toggleId)) {
-            throw new EntityNotFoundException("The requested toggle ["+ toggleId +"] was not found");
+            throw new ResourceNotFoundException("The requested toggle ["+ toggleId +"] was not found");
         }
 
         return toggleAssignmentRepository
@@ -71,7 +70,7 @@ public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
                     return toggleAssignmentRepository.save(toggleAssignment);
                 })
                 .map(ToggleAssignmentConverter::convertToVO)
-                .orElseThrow(() -> new EntityNotFoundException("The requested toggle assignment ["+ toggleAssignmentId +"] was not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("The requested toggle assignment ["+ toggleAssignmentId +"] was not found"));
     }
 
     @Override
@@ -83,6 +82,6 @@ public class ToggleAssignmentServiceImpl implements ToggleAssignmentService {
     private ToggleAssignment loadToggleAssignment(long toggleId, long toggleAssignmentId) {
         return toggleAssignmentRepository
                 .findByIdAndToggle_Id(toggleAssignmentId, toggleId)
-                .orElseThrow(() -> new EntityNotFoundException("The association between toggle ["+toggleId+"] and toggle assignment ["+toggleAssignmentId+"] is non existing"));
+                .orElseThrow(() -> new ResourceNotFoundException("The association between toggle ["+toggleId+"] and toggle assignment ["+toggleAssignmentId+"] is non existing"));
     }
 }
