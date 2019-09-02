@@ -1,6 +1,6 @@
-package io.pgsantos.toggles.data.vo;
+package io.pgsantos.toggles.data.vo.request;
 
-public class UpdateToggleAssignmentVO {
+public class UpdateToggleAssignmentRequestVO {
     private boolean toggleValue;
 
     public boolean getToggleValue() {

@@ -3,7 +3,8 @@ package io.pgsantos.toggles.service.impl;
 import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
-import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
+import io.pgsantos.toggles.data.vo.builder.AssignedTogglesVOBuilder;
 import io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder;
 import io.pgsantos.toggles.service.ToggleAssignmentSearchService;
 import io.pgsantos.toggles.service.config.ServiceConfig;
@@ -47,30 +48,34 @@ public class ToggleAssignmentSearchServiceImplIntegrationTest {
         String toggleName = RandomStringUtils.random(10);
         String toggleOwner = RandomStringUtils.random(10);
 
-        ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
+        AssignedTogglesVO expectedAssignedTogglesVO = AssignedTogglesVOBuilder.anAssignedTogglesVO()
                 .withToggleId(new Random().nextLong())
                 .withToggleName(toggleName)
-                .withToggleAssignmentId(new Random().nextLong())
-                .withToggleOwner(toggleOwner)
-                .withToggleValue(new Random().nextBoolean())
+                .withToggleAssignments(
+                        List.of(
+                                ToggleAssignmentVOBuilder.aToggleAssignmentVO()
+                                        .withToggleAssignmentId(new Random().nextLong())
+                                        .withToggleOwner(toggleOwner)
+                                        .withToggleValue(new Random().nextBoolean())
+                                        .build()))
                 .build();
 
         when(toggleAssignmentRepository.findAll(any(Example.class)))
                 .thenReturn(
                         List.of(
                                 ToggleAssignmentBuilder.aToggleAssignment()
-                                        .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
-                                        .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
-                                        .withToggleValue(expectedToggleAssignmentVO.getToggleValue())
+                                        .withId(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleAssignmentId())
+                                        .withToggleOwner(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleOwner())
+                                        .withToggleValue(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleValue())
                                         .withToggle(ToggleBuilder.aToggle()
-                                                .withId(expectedToggleAssignmentVO.getToggleId())
-                                                .withName(expectedToggleAssignmentVO.getToggleName())
+                                                .withId(expectedAssignedTogglesVO.getToggleId())
+                                                .withName(expectedAssignedTogglesVO.getToggleName())
                                                 .build())
                                         .build()));
 
-        List<ToggleAssignmentVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
+        List<AssignedTogglesVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
 
-        assertThat(toggleAssignmentVOs.get(0)).isEqualTo(expectedToggleAssignmentVO);
+        assertThat(toggleAssignmentVOs.get(0)).isEqualTo(expectedAssignedTogglesVO);
 
         verify(toggleAssignmentRepository)
                 .findAll(
@@ -92,7 +97,7 @@ public class ToggleAssignmentSearchServiceImplIntegrationTest {
 
         when(toggleAssignmentRepository.findAll(any(Example.class))).thenReturn(Collections.emptyList());
 
-        List<ToggleAssignmentVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
+        List<AssignedTogglesVO> toggleAssignmentVOs = toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
 
         assertThat(toggleAssignmentVOs).isEmpty();
 

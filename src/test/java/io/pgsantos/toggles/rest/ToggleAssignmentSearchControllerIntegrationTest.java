@@ -7,7 +7,8 @@ import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
-import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
+import io.pgsantos.toggles.data.vo.builder.AssignedTogglesVOBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -45,16 +46,16 @@ public class ToggleAssignmentSearchControllerIntegrationTest {
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
-    private String toggle1Name = RandomStringUtils.random(10, true, true);
-    private String toggle2Name = RandomStringUtils.random(10, true, true);
     private String toggleOwner1 = RandomStringUtils.random(10, true, true);
     private String toggleOwner2 = RandomStringUtils.random(10, true, true);
+
+    private Toggle toggle1, toggle2;
     private ToggleAssignment toggleAssignment1, toggleAssignment2, toggleAssignment3;
 
     @Before
     public void setUp() {
-        Toggle toggle1 = toggleRepository.save(ToggleBuilder.aToggle().withName(toggle1Name).build());
-        Toggle toggle2 = toggleRepository.save(ToggleBuilder.aToggle().withName(toggle2Name).build());
+        toggle1 = toggleRepository.save(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10, true, true)).build());
+        toggle2 = toggleRepository.save(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10, true, true)).build());
 
         toggleAssignment1 = toggleAssignmentRepository.save(
                 ToggleAssignmentBuilder.aToggleAssignment()
@@ -85,7 +86,7 @@ public class ToggleAssignmentSearchControllerIntegrationTest {
 
     @Test
     public void searchToggleAssignments_withNoCriteria_shouldReturnAll() {
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 createURL(),
                 HttpMethod.GET,
                 null,
@@ -94,29 +95,44 @@ public class ToggleAssignmentSearchControllerIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
                 .containsExactlyInAnyOrder(
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment1),
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment2),
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment3));
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle1.getId())
+                                .withToggleName(toggle1.getName())
+                                .withToggleAssignments(
+                                        List.of(
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment1),
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment3)))
+                                .build(),
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle2.getId())
+                                .withToggleName(toggle2.getName())
+                                .withToggleAssignments(List.of(ToggleAssignmentConverter.convertToVO(toggleAssignment2)))
+                                .build());
     }
 
     @Test
     public void searchToggleAssignments_withToggleName_shouldReturnAllToggleAssignmentsMatchingCriteria() {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(createURL())
-                .queryParam("toggleName", toggle1Name);
+                .queryParam("toggleName", toggle1.getName());
 
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
-                });
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
-                .containsExactlyInAnyOrder(
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment1),
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment3));
+                .containsOnly(
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle1.getId())
+                                .withToggleName(toggle1.getName())
+                                .withToggleAssignments(
+                                        List.of(
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment1),
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment3)))
+                                .build());
     }
 
     @Test
@@ -125,38 +141,48 @@ public class ToggleAssignmentSearchControllerIntegrationTest {
                 .fromHttpUrl(createURL())
                 .queryParam("toggleOwner", toggleOwner1);
 
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
-                });
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
                 .containsExactlyInAnyOrder(
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment1),
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment2));
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle1.getId())
+                                .withToggleName(toggle1.getName())
+                                .withToggleAssignments(List.of(ToggleAssignmentConverter.convertToVO(toggleAssignment1)))
+                                .build(),
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle2.getId())
+                                .withToggleName(toggle2.getName())
+                                .withToggleAssignments(List.of(ToggleAssignmentConverter.convertToVO(toggleAssignment2)))
+                                .build());
     }
 
     @Test
     public void searchToggleAssignments_withToggleOwnerAndToggleName_shouldReturnAllToggleAssignmentsMatchingCriteria() {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(createURL())
-                .queryParam("toggleName", toggle1Name)
+                .queryParam("toggleName", toggle2.getName())
                 .queryParam("toggleOwner", toggleOwner1);
 
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
-                });
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
-                .containsExactlyInAnyOrder(
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment1));
+                .containsOnly(
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle2.getId())
+                                .withToggleName(toggle2.getName())
+                                .withToggleAssignments(List.of(ToggleAssignmentConverter.convertToVO(toggleAssignment2)))
+                                .build());
     }
 
     @Test
@@ -165,12 +191,11 @@ public class ToggleAssignmentSearchControllerIntegrationTest {
                 .fromHttpUrl(createURL())
                 .queryParam("toggleName", RandomStringUtils.random(5, true, true));
 
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
-                });
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();

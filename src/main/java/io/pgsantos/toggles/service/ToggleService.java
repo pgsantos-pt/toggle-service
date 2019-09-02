@@ -1,7 +1,7 @@
 package io.pgsantos.toggles.service;
 
-import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.data.vo.request.ToggleRequestVO;
 
 import java.util.List;
 

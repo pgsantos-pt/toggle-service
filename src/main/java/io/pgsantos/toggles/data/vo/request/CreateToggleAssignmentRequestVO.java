@@ -1,8 +1,8 @@
-package io.pgsantos.toggles.data.vo;
+package io.pgsantos.toggles.data.vo.request;
 
 import javax.validation.constraints.NotBlank;
 
-public class CreateToggleAssignmentVO {
+public class CreateToggleAssignmentRequestVO {
     @NotBlank(message = "The parameter 'toggleOwner' is mandatory")
     private String toggleOwner;
 

@@ -1,5 +1,6 @@
 package io.pgsantos.toggles.rest.exception;
 
+import io.pgsantos.toggles.rest.exception.builder.ApiErrorBuilder;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -14,7 +15,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.persistence.PersistenceException;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
@@ -26,42 +26,45 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
                 .orElse(ex.getMessage());
 
         return ResponseEntity.badRequest().body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.BAD_REQUEST,
-                        "error", HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                        "message", errorMsg,
-                        "path", headers.getLocation()));
+                ApiErrorBuilder.anApiError()
+                        .withTimestamp(LocalDateTime.now())
+                        .withStatus(HttpStatus.BAD_REQUEST.value())
+                        .withError(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                        .withMessage(errorMsg)
+                        .build());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public final ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+    public final ResponseEntity<ApiError> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
 
         return ResponseEntity.unprocessableEntity().body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.UNPROCESSABLE_ENTITY,
-                        "error", HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
-                        "message", "It is not possible to process this request"));
+                ApiErrorBuilder.anApiError()
+                        .withTimestamp(LocalDateTime.now())
+                        .withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                        .withError(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                        .withMessage("It is not possible to process this request")
+                        .build());
     }
 
     @ExceptionHandler(PersistenceException.class)
-    public final ResponseEntity<Object> handlePersistenceException(PersistenceException exception) {
+    public final ResponseEntity<ApiError> handlePersistenceException(PersistenceException exception) {
         return ResponseEntity.unprocessableEntity().body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.UNPROCESSABLE_ENTITY,
-                        "error", HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
-                        "message", "It is not possible to process this request"));
+                ApiErrorBuilder.anApiError()
+                        .withTimestamp(LocalDateTime.now())
+                        .withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                        .withError(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                        .withMessage("It is not possible to process this request")
+                        .build());
     }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
-    public final ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException exception) {
+    public final ResponseEntity<ApiError> handleEmptyResultDataAccessException(EmptyResultDataAccessException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.NOT_FOUND,
-                        "error", HttpStatus.NOT_FOUND.getReasonPhrase(),
-                        "message", "The request produces an empty result"));
+                ApiErrorBuilder.anApiError()
+                        .withTimestamp(LocalDateTime.now())
+                        .withStatus(HttpStatus.NOT_FOUND.value())
+                        .withError(HttpStatus.NOT_FOUND.getReasonPhrase())
+                        .withMessage("The request produces an empty result")
+                        .build());
     }
 }

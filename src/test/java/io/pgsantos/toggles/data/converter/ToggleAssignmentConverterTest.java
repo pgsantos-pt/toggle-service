@@ -1,7 +1,6 @@
 package io.pgsantos.toggles.data.converter;
 
 import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
-import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
 import io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,8 +15,6 @@ public class ToggleAssignmentConverterTest {
     @Test
     public void convertToVO() {
         ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
-                .withToggleId(new Random().nextLong())
-                .withToggleName(RandomStringUtils.random(10))
                 .withToggleAssignmentId(new Random().nextLong())
                 .withToggleOwner(RandomStringUtils.random(10))
                 .withToggleValue(new Random().nextBoolean())
@@ -25,11 +22,6 @@ public class ToggleAssignmentConverterTest {
 
         ToggleAssignmentVO toggleAssignmentVO = ToggleAssignmentConverter.convertToVO(
                 ToggleAssignmentBuilder.aToggleAssignment()
-                        .withToggle(
-                                ToggleBuilder.aToggle()
-                                        .withId(expectedToggleAssignmentVO.getToggleId())
-                                        .withName(expectedToggleAssignmentVO.getToggleName())
-                                        .build())
                         .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
                         .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
                         .withToggleValue(expectedToggleAssignmentVO.getToggleValue())

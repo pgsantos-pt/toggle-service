@@ -4,9 +4,11 @@ import io.pgsantos.toggles.data.converter.ToggleConverter;
 import io.pgsantos.toggles.data.model.Toggle;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
-import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
 import io.pgsantos.toggles.data.vo.builder.ToggleRequestVOTestBuilder;
+import io.pgsantos.toggles.data.vo.request.ToggleRequestVO;
+import io.pgsantos.toggles.rest.exception.ApiError;
+import io.pgsantos.toggles.rest.exception.builder.ApiErrorBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -153,33 +155,47 @@ public class ToggleControllerIntegrationTest {
 
     @Test
     public void createToggle_withAlreadyExistingName_shouldReturnUnprocessableEntity() {
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .withError(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .withMessage("It is not possible to process this request")
+                .build();
+
         HttpEntity<ToggleRequestVO> request = new HttpEntity<>(
                 ToggleRequestVOTestBuilder.aToggleRequestVO()
                         .withName(toggle1.getName())
                         .build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.POST,
                 request,
-                String.class);
+                ApiError.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat(response.getBody()).contains("It is not possible to process this request");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
     public void createToggle_withMissingNameFieldInRequest_shouldReturnBadRequest() {
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.BAD_REQUEST.value())
+                .withError(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .withMessage("The field 'name' is mandatory")
+                .build();
+
         HttpEntity<ToggleRequestVO> request = new HttpEntity<>(ToggleRequestVOTestBuilder.aToggleRequestVO().build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.POST,
                 request,
-                String.class);
+                ApiError.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("The field 'name' is mandatory");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
@@ -207,39 +223,53 @@ public class ToggleControllerIntegrationTest {
 
     @Test
     public void updateToggle_withAlreadyExistingName_shouldReturnUnprocessableEntity() {
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .withError(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .withMessage("It is not possible to process this request")
+                .build();
+
         HttpEntity<ToggleRequestVO> request = new HttpEntity<>(
                 ToggleRequestVOTestBuilder.aToggleRequestVO()
                         .withName(toggle2.getName())
                         .build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL("/{id}"),
                 HttpMethod.PUT,
                 request,
-                String.class,
+                ApiError.class,
                 toggle1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat(response.getBody()).contains("It is not possible to process this request");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
     public void updateToggle_withMissingNameFieldInRequest_shouldReturnBadRequest(){
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.BAD_REQUEST.value())
+                .withError(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .withMessage("The field 'name' is mandatory")
+                .build();
+
         HttpEntity<ToggleRequestVO> request = new HttpEntity<>(ToggleRequestVOTestBuilder.aToggleRequestVO().build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL("/{id}"),
                 HttpMethod.PUT,
                 request,
-                String.class,
+                ApiError.class,
                 toggle1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("The field 'name' is mandatory");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
-    public void deleteToggle() {
+    public void deleteToggle_shouldReturnNoContent_andRerunningRequest_shouldReturnNotFound() {
         ResponseEntity<Void> deleteResponse = restTemplate.exchange(
                 createURL("/{id}"),
                 HttpMethod.DELETE,
@@ -249,27 +279,22 @@ public class ToggleControllerIntegrationTest {
 
         assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-        ResponseEntity<String> getResponse = restTemplate.exchange(
-                createURL("/{id}"),
-                HttpMethod.GET,
-                null,
-                String.class,
-                toggle1.getId());
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.NOT_FOUND.value())
+                .withError(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .withMessage("The request produces an empty result")
+                .build();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(getResponse.getBody()).contains("The requested toggle [" + toggle1.getId() + "] was not found");
-    }
-
-    @Test
-    public void deleteToggle_withNonExistingId() {
-        ResponseEntity<Object> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL("/{id}"),
                 HttpMethod.DELETE,
                 null,
-                Object.class,
+                ApiError.class,
                 new Random().nextLong());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     private String createURL(String uri) {

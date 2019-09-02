@@ -1,4 +1,4 @@
-package io.pgsantos.toggles.data.vo;
+package io.pgsantos.toggles.data.vo.request;
 
 import javax.validation.constraints.NotBlank;
 

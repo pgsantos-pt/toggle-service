@@ -1,7 +1,7 @@
 package io.pgsantos.toggles.rest;
 
-import io.pgsantos.toggles.data.vo.ToggleRequestVO;
 import io.pgsantos.toggles.data.vo.ToggleVO;
+import io.pgsantos.toggles.data.vo.request.ToggleRequestVO;
 import io.pgsantos.toggles.service.ToggleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

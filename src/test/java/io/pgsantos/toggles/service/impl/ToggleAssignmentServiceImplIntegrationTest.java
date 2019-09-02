@@ -6,12 +6,13 @@ import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
-import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.UpdateToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.builder.CreateToggleAssignmentVOTestBuilder;
+import io.pgsantos.toggles.data.vo.builder.AssignedTogglesVOBuilder;
+import io.pgsantos.toggles.data.vo.builder.CreateToggleAssignmentRequestVOTestBuilder;
 import io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder;
-import io.pgsantos.toggles.data.vo.builder.UpdateToggleAssignmentVOTestBuilder;
+import io.pgsantos.toggles.data.vo.builder.UpdateToggleAssignmentRequestVOTestBuilder;
+import io.pgsantos.toggles.data.vo.request.CreateToggleAssignmentRequestVO;
 import io.pgsantos.toggles.exception.ResourceNotFoundException;
 import io.pgsantos.toggles.service.ToggleAssignmentService;
 import io.pgsantos.toggles.service.config.ServiceConfig;
@@ -33,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -61,33 +61,35 @@ public class ToggleAssignmentServiceImplIntegrationTest {
     public void getToggleAssignmentsByToggleId() {
         long toggleId = new Random().nextLong();
 
-        ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
+        AssignedTogglesVO expectedAssignedTogglesVO = AssignedTogglesVOBuilder.anAssignedTogglesVO()
                 .withToggleId(toggleId)
                 .withToggleName(RandomStringUtils.random(10))
-                .withToggleAssignmentId(new Random().nextLong())
-                .withToggleOwner(RandomStringUtils.random(10))
-                .withToggleValue(new Random().nextBoolean())
+                .withToggleAssignments(
+                        List.of(
+                                ToggleAssignmentVOBuilder.aToggleAssignmentVO()
+                                        .withToggleAssignmentId(new Random().nextLong())
+                                        .withToggleOwner(RandomStringUtils.random(10))
+                                        .withToggleValue(new Random().nextBoolean())
+                                        .build()))
                 .build();
 
         when(toggleAssignmentRepository.findAllByToggle_Id(anyLong()))
                 .thenReturn(
                         Stream.of(
                                 ToggleAssignmentBuilder.aToggleAssignment()
-                                        .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
-                                        .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
-                                        .withToggleValue(expectedToggleAssignmentVO.getToggleValue())
+                                        .withId(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleAssignmentId())
+                                        .withToggleOwner(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleOwner())
+                                        .withToggleValue(expectedAssignedTogglesVO.getToggleAssignments().get(0).getToggleValue())
                                         .withToggle(
                                                 ToggleBuilder.aToggle()
-                                                        .withId(expectedToggleAssignmentVO.getToggleId())
-                                                        .withName(expectedToggleAssignmentVO.getToggleName())
+                                                        .withId(expectedAssignedTogglesVO.getToggleId())
+                                                        .withName(expectedAssignedTogglesVO.getToggleName())
                                                         .build())
                                         .build()));
 
-        List<ToggleAssignmentVO> toggleAssignmentVOsByToggleId = toggleAssignmentService.getToggleAssignmentsByToggleId(toggleId);
+        List<AssignedTogglesVO> toggleAssignmentVOsByToggleId = toggleAssignmentService.getToggleAssignmentsByToggleId(toggleId);
 
-        ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentVOsByToggleId.get(0);
-
-        assertThat(toggleAssignmentVO).isEqualTo(expectedToggleAssignmentVO);
+        assertThat(toggleAssignmentVOsByToggleId.get(0)).isEqualTo(expectedAssignedTogglesVO);
 
         verify(toggleAssignmentRepository).findAllByToggle_Id(toggleId);
     }
@@ -98,7 +100,7 @@ public class ToggleAssignmentServiceImplIntegrationTest {
 
         when(toggleAssignmentRepository.findAllByToggle_Id(anyLong())).thenReturn(Stream.empty());
 
-        List<ToggleAssignmentVO> toggleAssignmentVOsByToggleId = toggleAssignmentService.getToggleAssignmentsByToggleId(toggleId);
+        List<AssignedTogglesVO> toggleAssignmentVOsByToggleId = toggleAssignmentService.getToggleAssignmentsByToggleId(toggleId);
 
         assertThat(toggleAssignmentVOsByToggleId).isEmpty();
 
@@ -111,8 +113,6 @@ public class ToggleAssignmentServiceImplIntegrationTest {
         long toggleAssignmentId = new Random().nextLong();
 
         ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
-                .withToggleId(toggleId)
-                .withToggleName(RandomStringUtils.random(10))
                 .withToggleAssignmentId(toggleAssignmentId)
                 .withToggleOwner(RandomStringUtils.random(10))
                 .withToggleValue(new Random().nextBoolean())
@@ -125,11 +125,6 @@ public class ToggleAssignmentServiceImplIntegrationTest {
                                         .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
                                         .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
                                         .withToggleValue(expectedToggleAssignmentVO.getToggleValue())
-                                        .withToggle(
-                                                ToggleBuilder.aToggle()
-                                                        .withId(expectedToggleAssignmentVO.getToggleId())
-                                                        .withName(expectedToggleAssignmentVO.getToggleName())
-                                                        .build())
                                         .build()));
 
         ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.getToggleAssignment(toggleId, toggleAssignmentId);
@@ -160,16 +155,14 @@ public class ToggleAssignmentServiceImplIntegrationTest {
         boolean toggleValue = new Random().nextBoolean();
 
         ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
-                .withToggleId(toggleId)
-                .withToggleName(RandomStringUtils.random(10))
                 .withToggleAssignmentId(new Random().nextLong())
                 .withToggleOwner(toggleOwner)
                 .withToggleValue(toggleValue)
                 .build();
 
         Toggle toggle = ToggleBuilder.aToggle()
-                .withId(expectedToggleAssignmentVO.getToggleId())
-                .withName(expectedToggleAssignmentVO.getToggleName())
+                .withId(toggleId)
+                .withName(RandomStringUtils.random(10))
                 .build();
 
         when(toggleRepository.findById(anyLong())).thenReturn(Optional.of(toggle));
@@ -180,12 +173,11 @@ public class ToggleAssignmentServiceImplIntegrationTest {
                                 .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
                                 .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
                                 .withToggleValue(expectedToggleAssignmentVO.getToggleValue())
-                                .withToggle(toggle)
                                 .build());
 
         ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.createToggleAssignment(
                 toggleId,
-                CreateToggleAssignmentVOTestBuilder.aCreateToggleAssignmentVO()
+                CreateToggleAssignmentRequestVOTestBuilder.aCreateToggleAssignmentRequestVO()
                         .withToggleOwner(toggleOwner)
                         .withToggleValue(toggleValue)
                         .build());
@@ -208,7 +200,7 @@ public class ToggleAssignmentServiceImplIntegrationTest {
         when(toggleRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = catchThrowableOfType(() ->
-                toggleAssignmentService.createToggleAssignment(toggleId, any(CreateToggleAssignmentVO.class)),
+                toggleAssignmentService.createToggleAssignment(toggleId, any(CreateToggleAssignmentRequestVO.class)),
                 ResourceNotFoundException.class);
 
         assertThat(exception.getMessage()).isEqualTo("The requested toggle ["+ toggleId +"] was not found");
@@ -223,8 +215,6 @@ public class ToggleAssignmentServiceImplIntegrationTest {
         boolean toggleValue = new Random().nextBoolean();
 
         ToggleAssignmentVO expectedToggleAssignmentVO = ToggleAssignmentVOBuilder.aToggleAssignmentVO()
-                .withToggleId(toggleId)
-                .withToggleName(RandomStringUtils.random(10))
                 .withToggleAssignmentId(toggleAssignmentId)
                 .withToggleOwner(RandomStringUtils.random(10))
                 .withToggleValue(toggleValue)
@@ -239,17 +229,12 @@ public class ToggleAssignmentServiceImplIntegrationTest {
                                 .withId(expectedToggleAssignmentVO.getToggleAssignmentId())
                                 .withToggleOwner(expectedToggleAssignmentVO.getToggleOwner())
                                 .withToggleValue(toggleValue)
-                                .withToggle(
-                                        ToggleBuilder.aToggle()
-                                                .withId(expectedToggleAssignmentVO.getToggleId())
-                                                .withName(expectedToggleAssignmentVO.getToggleName())
-                                                .build())
                                 .build());
 
         ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.updateToggleAssignment(
                 toggleId,
                 toggleAssignmentId,
-                UpdateToggleAssignmentVOTestBuilder.anUpdateToggleAssignmentVO().withToggleValue(toggleValue).build());
+                UpdateToggleAssignmentRequestVOTestBuilder.anUpdateToggleAssignmentRequestVO().withToggleValue(toggleValue).build());
 
         assertThat(toggleAssignmentVO).isEqualTo(expectedToggleAssignmentVO);
 
@@ -267,7 +252,7 @@ public class ToggleAssignmentServiceImplIntegrationTest {
         when(toggleAssignmentRepository.findByIdAndToggle_Id(anyLong(), anyLong())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = catchThrowableOfType(
-                () -> toggleAssignmentService.updateToggleAssignment(toggleId, toggleAssignmentId, UpdateToggleAssignmentVOTestBuilder.anUpdateToggleAssignmentVO().build()),
+                () -> toggleAssignmentService.updateToggleAssignment(toggleId, toggleAssignmentId, UpdateToggleAssignmentRequestVOTestBuilder.anUpdateToggleAssignmentRequestVO().build()),
                 ResourceNotFoundException.class);
 
         assertThat(exception.getMessage()).isEqualTo("The association between toggle ["+toggleId+"] and toggle assignment ["+toggleAssignmentId+"] is non existing");

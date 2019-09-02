@@ -1,6 +1,6 @@
 package io.pgsantos.toggles.rest;
 
-import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
 import io.pgsantos.toggles.service.ToggleAssignmentSearchService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ public class ToggleAssignmentSearchController {
     }
 
     @GetMapping(value = "/search-toggle-assignments", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ToggleAssignmentVO> searchToggleAssignments(@RequestParam(required = false) String toggleName, @RequestParam(required = false) String toggleOwner) {
+    public List<AssignedTogglesVO> searchToggleAssignments(@RequestParam(required = false) String toggleName, @RequestParam(required = false) String toggleOwner) {
         return toggleAssignmentSearchService.searchToggleAssignments(toggleName, toggleOwner);
     }
 }

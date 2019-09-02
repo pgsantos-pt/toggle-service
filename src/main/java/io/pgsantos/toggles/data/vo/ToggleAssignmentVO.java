@@ -5,7 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class ToggleAssignmentVO extends ToggleVO {
+public class ToggleAssignmentVO {
     private long toggleAssignmentId;
     private String toggleOwner;
     private boolean toggleValue;
@@ -43,7 +43,6 @@ public class ToggleAssignmentVO extends ToggleVO {
         ToggleAssignmentVO that = (ToggleAssignmentVO) o;
 
         return new EqualsBuilder()
-                .appendSuper(super.equals(o))
                 .append(toggleAssignmentId, that.toggleAssignmentId)
                 .append(toggleValue, that.toggleValue)
                 .append(toggleOwner, that.toggleOwner)
@@ -53,7 +52,6 @@ public class ToggleAssignmentVO extends ToggleVO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .appendSuper(super.hashCode())
                 .append(toggleAssignmentId)
                 .append(toggleOwner)
                 .append(toggleValue)

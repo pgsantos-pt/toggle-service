@@ -7,11 +7,15 @@ import io.pgsantos.toggles.data.model.builder.ToggleAssignmentBuilder;
 import io.pgsantos.toggles.data.model.builder.ToggleBuilder;
 import io.pgsantos.toggles.data.repository.ToggleAssignmentRepository;
 import io.pgsantos.toggles.data.repository.ToggleRepository;
-import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.UpdateToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.builder.CreateToggleAssignmentVOTestBuilder;
-import io.pgsantos.toggles.data.vo.builder.UpdateToggleAssignmentVOTestBuilder;
+import io.pgsantos.toggles.data.vo.builder.AssignedTogglesVOBuilder;
+import io.pgsantos.toggles.data.vo.builder.CreateToggleAssignmentRequestVOTestBuilder;
+import io.pgsantos.toggles.data.vo.builder.UpdateToggleAssignmentRequestVOTestBuilder;
+import io.pgsantos.toggles.data.vo.request.CreateToggleAssignmentRequestVO;
+import io.pgsantos.toggles.data.vo.request.UpdateToggleAssignmentRequestVO;
+import io.pgsantos.toggles.rest.exception.ApiError;
+import io.pgsantos.toggles.rest.exception.builder.ApiErrorBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -87,7 +91,7 @@ public class ToggleAssignmentControllerIntegrationTest {
 
     @Test
     public void getToggleAssignmentsByToggleId() {
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.GET,
                 null,
@@ -96,16 +100,22 @@ public class ToggleAssignmentControllerIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
-                .containsExactlyInAnyOrder(
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment1),
-                        ToggleAssignmentConverter.convertToVO(toggleAssignment3));
+                .containsOnly(
+                        AssignedTogglesVOBuilder.anAssignedTogglesVO()
+                                .withToggleId(toggle1.getId())
+                                .withToggleName(toggle1.getName())
+                                .withToggleAssignments(
+                                        List.of(
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment1),
+                                                ToggleAssignmentConverter.convertToVO(toggleAssignment3)))
+                                .build());
     }
 
     @Test
     public void getToggleAssignmentsByToggleId_withNonExistingToggleId_shouldReturnEmptyList() {
         long toggleId = new Random().nextLong();
 
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.GET,
                 null,
@@ -118,7 +128,7 @@ public class ToggleAssignmentControllerIntegrationTest {
 
     @Test
     public void getToggleAssignmentsByToggleId_withToggleIdHavingNoChildren_shouldReturnEmptyList() {
-        ResponseEntity<List<ToggleAssignmentVO>> response = restTemplate.exchange(
+        ResponseEntity<List<AssignedTogglesVO>> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.GET,
                 null,
@@ -192,8 +202,8 @@ public class ToggleAssignmentControllerIntegrationTest {
 
     @Test
     public void createToggleAssignment() {
-        HttpEntity<CreateToggleAssignmentVO> request = new HttpEntity<>(
-                CreateToggleAssignmentVOTestBuilder.aCreateToggleAssignmentVO()
+        HttpEntity<CreateToggleAssignmentRequestVO> request = new HttpEntity<>(
+                CreateToggleAssignmentRequestVOTestBuilder.aCreateToggleAssignmentRequestVO()
                         .withToggleOwner(RandomStringUtils.random(10, true, true))
                         .withToggleValue(new Random().nextBoolean())
                         .build());
@@ -221,8 +231,8 @@ public class ToggleAssignmentControllerIntegrationTest {
     public void createToggleAssignment_withNonExistingToggleId_shouldReturnNotFound() {
         long nonExistingToggleId = new Random().nextLong();
 
-        HttpEntity<CreateToggleAssignmentVO> request = new HttpEntity<>(
-                CreateToggleAssignmentVOTestBuilder.aCreateToggleAssignmentVO()
+        HttpEntity<CreateToggleAssignmentRequestVO> request = new HttpEntity<>(
+                CreateToggleAssignmentRequestVOTestBuilder.aCreateToggleAssignmentRequestVO()
                         .withToggleOwner(RandomStringUtils.random(10, true, true))
                         .withToggleValue(new Random().nextBoolean())
                         .build());
@@ -240,47 +250,61 @@ public class ToggleAssignmentControllerIntegrationTest {
 
     @Test
     public void createToggleAssignment_withAnAlreadyExistingOwner_shouldReturnUnprocessableEntity() {
-        HttpEntity<CreateToggleAssignmentVO> request = new HttpEntity<>(
-                CreateToggleAssignmentVOTestBuilder.aCreateToggleAssignmentVO()
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .withError(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .withMessage("It is not possible to process this request")
+                .build();
+
+        HttpEntity<CreateToggleAssignmentRequestVO> request = new HttpEntity<>(
+                CreateToggleAssignmentRequestVOTestBuilder.aCreateToggleAssignmentRequestVO()
                         .withToggleOwner(toggleAssignment1.getToggleOwner())
                         .withToggleValue(new Random().nextBoolean())
                         .build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.POST,
                 request,
-                String.class,
+                ApiError.class,
                 toggle1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat(response.getBody()).contains("It is not possible to process this request");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
     public void createToggleAssignment_withMissingOwnerFieldInRequest_shouldReturnBadRequest() {
-        HttpEntity<CreateToggleAssignmentVO> request = new HttpEntity<>(
-                CreateToggleAssignmentVOTestBuilder.aCreateToggleAssignmentVO()
+        ApiError expectedApiError = ApiErrorBuilder.anApiError()
+                .withStatus(HttpStatus.BAD_REQUEST.value())
+                .withError(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .withMessage("The parameter 'toggleOwner' is mandatory")
+                .build();
+
+        HttpEntity<CreateToggleAssignmentRequestVO> request = new HttpEntity<>(
+                CreateToggleAssignmentRequestVOTestBuilder.aCreateToggleAssignmentRequestVO()
                         .withToggleValue(new Random().nextBoolean())
                         .build());
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<ApiError> response = restTemplate.exchange(
                 createURL(""),
                 HttpMethod.POST,
                 request,
-                String.class,
+                ApiError.class,
                 toggle1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("The parameter 'toggleOwner' is mandatory");
+        assertThat(response.getBody()).isEqualToIgnoringGivenFields(expectedApiError, "timestamp");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
     public void updateToggleAssignment() {
         boolean originalToggleValue = toggleAssignment2.getToggleValue();
 
-        HttpEntity<UpdateToggleAssignmentVO> request = new HttpEntity<>(
-                UpdateToggleAssignmentVOTestBuilder.anUpdateToggleAssignmentVO()
+        HttpEntity<UpdateToggleAssignmentRequestVO> request = new HttpEntity<>(
+                UpdateToggleAssignmentRequestVOTestBuilder.anUpdateToggleAssignmentRequestVO()
                         .withToggleValue(!originalToggleValue)
                         .build());
 

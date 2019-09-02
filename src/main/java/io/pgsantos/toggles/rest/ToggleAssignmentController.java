@@ -1,8 +1,9 @@
 package io.pgsantos.toggles.rest;
 
-import io.pgsantos.toggles.data.vo.CreateToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.AssignedTogglesVO;
 import io.pgsantos.toggles.data.vo.ToggleAssignmentVO;
-import io.pgsantos.toggles.data.vo.UpdateToggleAssignmentVO;
+import io.pgsantos.toggles.data.vo.request.CreateToggleAssignmentRequestVO;
+import io.pgsantos.toggles.data.vo.request.UpdateToggleAssignmentRequestVO;
 import io.pgsantos.toggles.service.ToggleAssignmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +33,7 @@ public class ToggleAssignmentController {
     }
 
     @GetMapping
-    public List<ToggleAssignmentVO> getToggleAssignmentsByToggleId(@PathVariable long id) {
+    public List<AssignedTogglesVO> getToggleAssignmentsByToggleId(@PathVariable long id) {
         return toggleAssignmentService.getToggleAssignmentsByToggleId(id);
     }
 
@@ -42,14 +43,14 @@ public class ToggleAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<ToggleAssignmentVO> createToggleAssignment(@PathVariable long id, @Valid @RequestBody CreateToggleAssignmentVO createToggleAssignmentVO) throws URISyntaxException {
-        ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.createToggleAssignment(id, createToggleAssignmentVO);
+    public ResponseEntity<ToggleAssignmentVO> createToggleAssignment(@PathVariable long id, @Valid @RequestBody CreateToggleAssignmentRequestVO createToggleAssignmentRequestVO) throws URISyntaxException {
+        ToggleAssignmentVO toggleAssignmentVO = toggleAssignmentService.createToggleAssignment(id, createToggleAssignmentRequestVO);
         return ResponseEntity.created(new URI("/toggles/"+id+"/toggle-assignments/"+toggleAssignmentVO.getToggleAssignmentId())).body(toggleAssignmentVO);
     }
 
     @PutMapping("/{toggleAssignmentId}")
-    public ToggleAssignmentVO updateToggleAssignment(@PathVariable long id, @PathVariable long toggleAssignmentId, @RequestBody UpdateToggleAssignmentVO updateToggleAssignmentVO) {
-        return toggleAssignmentService.updateToggleAssignment(id, toggleAssignmentId, updateToggleAssignmentVO);
+    public ToggleAssignmentVO updateToggleAssignment(@PathVariable long id, @PathVariable long toggleAssignmentId, @RequestBody UpdateToggleAssignmentRequestVO updateToggleAssignmentRequestVO) {
+        return toggleAssignmentService.updateToggleAssignment(id, toggleAssignmentId, updateToggleAssignmentRequestVO);
     }
 
     @DeleteMapping("/{toggleAssignmentId}")

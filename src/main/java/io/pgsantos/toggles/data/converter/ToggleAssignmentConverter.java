@@ -8,8 +8,6 @@ import static io.pgsantos.toggles.data.vo.builder.ToggleAssignmentVOBuilder.aTog
 public class ToggleAssignmentConverter {
     public static ToggleAssignmentVO convertToVO(ToggleAssignment toggleAssignment) {
         return aToggleAssignmentVO()
-                .withToggleId(toggleAssignment.getToggle().getId())
-                .withToggleName(toggleAssignment.getToggle().getName())
                 .withToggleAssignmentId(toggleAssignment.getId())
                 .withToggleOwner(toggleAssignment.getToggleOwner())
                 .withToggleValue(toggleAssignment.getToggleValue())
