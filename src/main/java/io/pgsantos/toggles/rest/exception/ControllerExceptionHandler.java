@@ -62,6 +62,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
                         "timestamp", LocalDateTime.now(),
                         "status", HttpStatus.NOT_FOUND,
                         "error", HttpStatus.NOT_FOUND.getReasonPhrase(),
-                        "message", "The request produces in an empty result"));
+                        "message", "The request produces an empty result"));
     }
 }
