@@ -63,6 +63,13 @@ public class ToggleAssignmentRepositoryIntegrationTest {
     }
 
     @Test
+    public void findAllByToggle_Id_whenNonExistingToggleId_shouldReturnEmptyStream() {
+        Stream<ToggleAssignment> toggleAssignments = toggleAssignmentRepository.findAllByToggle_Id(new Random().nextLong());
+
+        assertThat(toggleAssignments).isEmpty();
+    }
+
+    @Test
     public void findByIdAndToggle_Id() {
         Toggle toggle = entityManager.persist(ToggleBuilder.aToggle().withName(RandomStringUtils.random(10)).build());
         ToggleAssignment expectedToggleAssignment = entityManager.persist(
