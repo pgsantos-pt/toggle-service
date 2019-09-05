@@ -1,5 +1,8 @@
 package io.pgsantos.toggles.data.vo.request;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.validation.constraints.NotBlank;
 
 public class CreateToggleAssignmentRequestVO {
@@ -22,5 +25,10 @@ public class CreateToggleAssignmentRequestVO {
 
     public void setToggleValue(boolean toggleValue) {
         this.toggleValue = toggleValue;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
     }
 }
