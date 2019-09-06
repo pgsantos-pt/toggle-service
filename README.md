@@ -9,7 +9,7 @@ To run, open a terminal and type:
 
 There is also a mvnw.cmd file for Windows users.
 
-The application will start on **localhost** on port **8080** with root path **"/"**: `http://localhost:8080/`
+The application will start on: `http://localhost:8080/`
 
 ## Using the application
 To try out the application go to `http://localhost:8080/swagger-ui.html`
